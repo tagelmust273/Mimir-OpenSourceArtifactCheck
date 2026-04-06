@@ -1,31 +1,42 @@
-# OSINT Artifact Analyzer Bot
+# 🤖 OSINT Artifact Analyzer Bot
 
-Telegram бот для анализа IP-адресов, доменов и хешей с использованием OSINT-сервисов.
+[![Python Version](https://img.shields.io/badge/python-3.11-blue.svg)](https://python.org)
+[![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
+[![Telegram](https://img.shields.io/badge/Telegram-Bot-blue.svg)](https://t.me/yourbot)
 
-## Features
+Telegram бот для автоматического анализа IP-адресов, доменов и хешей через OSINT-сервисы.
 
-- ✅ IP address analysis (AbuseIPDB, GreyNoise, VirusTotal)
-- ✅ Domain analysis (WHOIS, DNS, SSL, URLScan, VirusTotal)
-- ✅ Hash analysis (VirusTotal, Hybrid Analysis)
-- ✅ Port scanning
-- ✅ GeoLocation with maps
-- ✅ PDF reports generation
-- ✅ CSV/JSON export
-- ✅ Threat visualization charts
-- ✅ Rate limiting & security
+## ✨ Возможности
 
-## Installation
+| Тип | Сервисы |
+|-----|---------|
+| 🌐 IP | AbuseIPDB, GreyNoise, VirusTotal, Port Scanner, GeoLocation |
+| 📡 Домен | WHOIS, DNS, SSL, URLScan.io, VirusTotal |
+| 🔑 Хеш | VirusTotal, Hybrid Analysis |
 
-1. Clone repository
-2. Copy `.env.example` to `.env` and fill in your tokens
-3. Install dependencies: `pip install -r requirements.txt`
-4. Run: `python main.py`
+### Дополнительно
+- 📊 PDF отчеты с графиками
+- 💾 Экспорт в CSV/JSON
+- 📈 Визуализация угроз
+- 🔗 Графы связей
+- 🗺️ Геолокация на карте
 
-## Deployment
+## 🚀 Быстрый старт
 
-Use systemd service for production:
+### Локальный запуск
 
-```bash
-sudo cp osintbot.service /etc/systemd/system/
-sudo systemctl enable osintbot
-sudo systemctl start osintbot
+# Клонирование
+git clone https://github.com/yourusername/osint-bot.git
+cd osint-bot
+
+# Настройка
+cp .env.example .env
+# Отредактируйте .env (добавьте BOT_TOKEN)
+
+# Установка
+python -m venv venv
+source venv/bin/activate  # Windows: venv\Scripts\activate
+pip install -r requirements.txt
+
+# Запуск
+python src/main.py
