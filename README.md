@@ -1,6 +1,6 @@
 # 🤖 Mimir - OpenSourceArtifactChecker Bot
 
-![MimirHead](https://github.com/{tagelmust273}/{Mimir---OpenSourceArtifactCheck}/raw/{main}/mimirhead.jpg)
+![MimirHead](https://github.com/tagelmust273/Mimir---OpenSourceArtifactCheck/raw/main/mimirhead.jpg)
 
 [![Python Version](https://img.shields.io/badge/python-3.11-blue.svg)](https://python.org)
 [![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
