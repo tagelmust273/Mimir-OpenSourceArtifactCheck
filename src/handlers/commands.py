@@ -54,3 +54,57 @@ async def help_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
 • 💾 экспорт CSV/JSON
 
 *Примеры:*
+8.8.8.8
+google.com
+5d41402abc4b2a76b9719d911017c592
+"""
+    await update.message.reply_text(text, parse_mode='Markdown')
+
+
+async def about(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    """Handle /about command"""
+    text = """
+ℹ️ *О боте*
+
+*OSINT Artifact Analyzer Bot v1.0*
+
+Инструмент для анализа подозрительных артефактов с использованием OSINT-сервисов.
+
+*Технологии:*
+• Python 3.11
+• python-telegram-bot 20.6
+• aiohttp (асинхронные запросы)
+• Matplotlib + NetworkX (визуализация)
+• ReportLab (PDF отчеты)
+• Docker (контейнеризация)
+
+*Безопасность:*
+• Валидация входных данных
+• Защита от SSRF атак
+• Rate limiting
+• Санитизация вывода
+• Блокировка приватных IP
+
+*Разработчик:* OSINT Security Team
+*Лицензия:* MIT
+"""
+    await update.message.reply_text(text, parse_mode='Markdown')
+
+
+async def stats(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    """Handle /stats command"""
+    from utils.rate_limiter import rate_limiter
+
+    user_id = str(update.effective_user.id)
+    remaining = rate_limiter.get_remaining(user_id)
+    total_analyzed = context.user_data.get('total_analyzed', 0)
+
+    text = f"""
+📊 *Статистика*
+
+Ваш лимит: 10 запросов в минуту
+Осталось запросов: {remaining}
+
+Всего обработано артефактов: {total_analyzed}
+"""
+    await update.message.reply_text(text, parse_mode='Markdown')
