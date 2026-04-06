@@ -4,7 +4,7 @@ setup(
     name="osint-bot",
     version="1.0.0",
     description="OSINT Artifact Analyzer Telegram Bot",
-    author="OSINT Security Team",
+    author="TamirTarchokov aka tagelmust",
     packages=find_packages(where="src"),
     package_dir={"": "src"},
     python_requires=">=3.11",
