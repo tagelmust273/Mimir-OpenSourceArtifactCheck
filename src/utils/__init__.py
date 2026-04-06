@@ -1,3 +1,5 @@
-from .rate_limiter import RateLimiter
+"""Utilities module"""
 
-__all__ = ['RateLimiter']
+from .rate_limiter import RateLimiter, rate_limiter
+
+__all__ = ['RateLimiter', 'rate_limiter']
