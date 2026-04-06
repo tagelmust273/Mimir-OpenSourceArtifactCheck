@@ -12,3 +12,14 @@ services:
     volumes:
       - ../logs:/app/logs
       - ../data:/app/data
+    networks:
+      - osint-network
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+networks:
+  osint-network:
+    driver: bridge
