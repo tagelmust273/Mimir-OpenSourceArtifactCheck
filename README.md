@@ -51,12 +51,13 @@ Telegram бот для автоматического анализа IP-адре
 
 # 1. Клонирование репозитория
 git clone https://github.com/tagelmust273/Mimir-OpenSourceArtifactCheck.git
+
 cd Mimir-OpenSourceArtifactCheck
 
 # 2. Настройка переменных окружения
 cp .env.example .env
 
-# 3. Отредактируйте .env файл (обязательно добавьте BOT_TOKEN)
+# 3. Отредактируйте .env файл 
 nano .env  
 
 # 4. Запуск бота через Docker Compose
