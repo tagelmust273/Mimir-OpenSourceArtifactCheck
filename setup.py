@@ -1,7 +1,7 @@
 from setuptools import setup, find_packages
 
 setup(
-    name="osint-bot",
+    name="Mimir",
     version="1.0.0",
     description="OSINT Artifact Analyzer Telegram Bot",
     author="TamirTarchokov aka tagelmust",
