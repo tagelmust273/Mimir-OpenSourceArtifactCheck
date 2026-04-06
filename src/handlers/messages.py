@@ -7,12 +7,12 @@ from telegram.constants import ParseMode
 
 from security.validators import InputValidator
 from security.sanitizers import OutputSanitizer
-from utils.rate_limiter import rate_limiter
 from core.artifact_analyzer import ArtifactAnalyzer
 from config import settings
+from utils.rate_limiter import RateLimiter
+rate_limiter = RateLimiter(max_requests=settings.security.max_requests_per_minute)
 
 logger = logging.getLogger(__name__)
-
 
 def format_results(artifact_type: str, artifact_value: str, results: list) -> str:
     """Format analysis results for display"""
