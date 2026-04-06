@@ -2,6 +2,10 @@
 
 from telegram import Update
 from telegram.ext import ContextTypes
+from utils.rate_limiter import RateLimiter
+from config import settings
+
+rate_limiter = RateLimiter(max_requests=settings.security.max_requests_per_minute)
 
 
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
