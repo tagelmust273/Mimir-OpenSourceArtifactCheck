@@ -47,26 +47,34 @@ class ArtifactAnalyzer:
                 results.append(geo)
 
         elif artifact_type == "domain":
-            # OSINT services
+            results = []
+            
+            # URLScan.io
             urlscan = await OSINTServices.check_urlscan(artifact_value)
-            if "error" not in urlscan:
-                results.append(urlscan)
+            results.append(urlscan)
+            logger.info(f"URLScan result: service={urlscan.get('service')}, error={urlscan.get('error', 'no error')}")
 
+            # VirusTotal
             vt = await OSINTServices.check_virustotal(artifact_value, "domain")
-            if "error" not in vt:
-                results.append(vt)
+            results.append(vt)
+            logger.info(f"VirusTotal result: service={vt.get('service')}, error={vt.get('error', 'no error')}")
 
-            # Advanced analysis
+            # WHOIS
             whois = await AdvancedAnalysis.get_whois_info(artifact_value)
-            if "error" not in whois:
-                results.append(whois)
+            results.append(whois)
+            logger.info(f"WHOIS result: service={whois.get('service')}, error={whois.get('error', 'no error')}")
 
+            # DNS Records
             dns = await AdvancedAnalysis.get_dns_records(artifact_value)
             results.append(dns)
+            logger.info(f"DNS result: service={dns.get('service')}, error={dns.get('error', 'no error')}")
 
+            # SSL/TLS
             ssl = await AdvancedAnalysis.get_ssl_info(artifact_value)
-            if "error" not in ssl:
-                results.append(ssl)
+            results.append(ssl)
+            logger.info(f"SSL result: service={ssl.get('service')}, error={ssl.get('error', 'no error')}")
+
+            logger.info(f"Analyzed domain: {artifact_value} - {len(results)} results")
 
         elif artifact_type == "hash":
             vt = await OSINTServices.check_virustotal(artifact_value, "hash")

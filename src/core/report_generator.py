@@ -82,11 +82,27 @@ class ReportGenerator:
 
             # Prepare table data
             data = []
-            for key, value in result.items():
-                if key != 'service' and not isinstance(value, (dict, list)):
-                    key_name = key.replace('_', ' ').title()
-                    value_str = str(value)[:100]
-                    data.append([key_name, value_str])
+            
+            # Специальная обработка для DNS Records
+            if service == "DNS Records":
+                records = result.get('records', {})
+                if records.get('A'):
+                    data.append(['A Records', ', '.join(records['A'][:5])])
+                if records.get('MX'):
+                    mx_str = ', '.join([f"{mx['exchange']} (priority {mx['preference']})" for mx in records['MX'][:5]])
+                    data.append(['MX Records', mx_str])
+                if records.get('TXT'):
+                    txt_str = '; '.join([txt[:60] + ('...' if len(txt) > 60 else '') for txt in records['TXT'][:3]])
+                    data.append(['TXT Records', txt_str])
+                if records.get('NS'):
+                    data.append(['NS Records', ', '.join(records['NS'][:5])])
+            else:
+                # Обычная обработка для других сервисов
+                for key, value in result.items():
+                    if key != 'service' and not isinstance(value, (dict, list)):
+                        key_name = key.replace('_', ' ').title()
+                        value_str = str(value)[:100]
+                        data.append([key_name, value_str])
 
             if data:
                 table = Table(data, colWidths=[2*inch, 3.5*inch])
@@ -103,13 +119,43 @@ class ReportGenerator:
                 story.append(table)
                 story.append(Spacer(1, 10))
 
-        # Add chart
-        if chart_buffer:
-            story.append(Paragraph("Threat Visualization", heading_style))
-            chart_buffer.seek(0)
+        # Add simple text threat summary instead of chart
+        threat_data = {
+            'malicious': 0,
+            'suspicious': 0,
+            'harmless': 0,
+            'undetected': 0
+        }
+        
+        for result in results:
+            if result.get('service') == 'VirusTotal':
+                threat_data['malicious'] = result.get('malicious', 0)
+                threat_data['suspicious'] = result.get('suspicious', 0)
+                threat_data['harmless'] = result.get('harmless', 0)
+                threat_data['undetected'] = result.get('undetected', 0)
+        
+        total = sum(threat_data.values())
+        if total > 0:
+            story.append(Paragraph("Threat Summary", heading_style))
             story.append(Spacer(1, 12))
-            img = Image(chart_buffer, width=5*inch, height=3*inch)
-            story.append(img)
+            
+            threat_table_data = [
+                ['Threat Type', 'Count', 'Percentage'],
+                ['Malicious', str(threat_data['malicious']), f"{threat_data['malicious']/total*100:.1f}%"],
+                ['Suspicious', str(threat_data['suspicious']), f"{threat_data['suspicious']/total*100:.1f}%"],
+                ['Harmless', str(threat_data['harmless']), f"{threat_data['harmless']/total*100:.1f}%"],
+                ['Undetected', str(threat_data['undetected']), f"{threat_data['undetected']/total*100:.1f}%"],
+            ]
+            
+            threat_table = Table(threat_table_data, colWidths=[2*inch, 1.5*inch, 1.5*inch])
+            threat_table.setStyle(TableStyle([
+                ('BACKGROUND', (0, 0), (-1, 0), colors.grey),
+                ('TEXTCOLOR', (0, 0), (-1, 0), colors.whitesmoke),
+                ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
+                ('GRID', (0, 0), (-1, -1), 1, colors.black),
+                ('FONTSIZE', (0, 0), (-1, -1), 10),
+            ]))
+            story.append(threat_table)
 
         # Build PDF
         doc.build(story)

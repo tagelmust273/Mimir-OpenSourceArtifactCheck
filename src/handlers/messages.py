@@ -50,10 +50,10 @@ def format_results(artifact_type: str, artifact_value: str, results: list) -> st
             output += f"  ✅ Harmless: {result.get('harmless', 0)}\n"
 
         elif service == "WHOIS":
-            output += f"  📝 Registrar: {result.get('registrar', 'N/A')}\n"
+            output += f"  📝 Registrar: {OutputSanitizer.sanitize_markdown(str(result.get('registrar', 'N/A'))[:80])}\n"
             output += f"  📅 Created: {result.get('creation_date', 'N/A')}\n"
             output += f"  ⏰ Expires: {result.get('expiration_date', 'N/A')}\n"
-            output += f"  🏢 Organization: {result.get('organization', 'N/A')}\n"
+            output += f"  🏢 Organization: {OutputSanitizer.sanitize_markdown(str(result.get('organization', 'N/A'))[:80])}\n"
 
         elif service == "DNS Records":
             records = result.get('records', {})
@@ -61,13 +61,14 @@ def format_results(artifact_type: str, artifact_value: str, results: list) -> st
                 output += f"  🌐 A Records: {', '.join(records['A'][:3])}\n"
             if records.get('MX'):
                 mx_str = ', '.join([f"{mx['exchange']}({mx['preference']})" for mx in records['MX'][:3]])
-                output += f"  📧 MX Records: {mx_str}\n"
+                output += f"  📧 MX Records: {OutputSanitizer.sanitize_markdown(mx_str)}\n"
             if records.get('TXT'):
-                output += f"  📝 TXT Records: {records['TXT'][0][:50]}...\n"
+                txt_preview = records['TXT'][0][:50]
+                output += f"  📝 TXT Records: {OutputSanitizer.sanitize_markdown(txt_preview)}...\n"
 
         elif service == "SSL/TLS":
-            output += f"  🔒 Issuer: {result.get('issuer', 'N/A')}\n"
-            output += f"  🏷️ Subject: {result.get('subject', 'N/A')}\n"
+            output += f"  🔒 Issuer: {OutputSanitizer.sanitize_markdown(str(result.get('issuer', 'N/A'))[:60])}\n"
+            output += f"  🏷️ Subject: {OutputSanitizer.sanitize_markdown(str(result.get('subject', 'N/A'))[:60])}\n"
             output += f"  📅 Valid: {result.get('not_before', 'N/A')}\n"
             output += f"  📅 Until: {result.get('not_after', 'N/A')}\n"
 
@@ -76,14 +77,14 @@ def format_results(artifact_type: str, artifact_value: str, results: list) -> st
             output += f"  🔓 Open ports: {len(open_ports)}\n"
             if open_ports:
                 ports_str = ', '.join([f"{p['port']}({p['service']})" for p in open_ports[:5]])
-                output += f"  📡 {ports_str}\n"
+                output += f"  📡 {OutputSanitizer.sanitize_markdown(ports_str)}\n"
 
         elif service == "GeoLocation":
-            output += f"  📍 Location: {result.get('city', 'N/A')}, {result.get('country', 'N/A')}\n"
-            output += f"  🏢 ISP: {result.get('isp', 'N/A')}\n"
+            output += f"  📍 Location: {OutputSanitizer.sanitize_markdown(str(result.get('city', 'N/A')))}, {OutputSanitizer.sanitize_markdown(str(result.get('country', 'N/A')))}\n"
+            output += f"  🏢 ISP: {OutputSanitizer.sanitize_markdown(str(result.get('isp', 'N/A')))}\n"
             if result.get('latitude'):
                 output += f"  🗺️ Coordinates: {result['latitude']:.4f}, {result['longitude']:.4f}\n"
-
+                
         elif service == "URLScan.io":
             output += f"  📊 Total scans: {result.get('total_scans', 0)}\n"
             output += f"  🚨 Malicious: {result.get('malicious_scans', 0)}\n"
@@ -91,7 +92,6 @@ def format_results(artifact_type: str, artifact_value: str, results: list) -> st
         output += "\n"
 
     return OutputSanitizer.truncate(output, settings.security.max_message_length)
-
 
 async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """Handle incoming messages"""
@@ -156,7 +156,7 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
         await processing_msg.edit_text(
             output,
-            parse_mode=ParseMode.MARKDOWN,
+            parse_mode=None,
             reply_markup=reply_markup
         )
 

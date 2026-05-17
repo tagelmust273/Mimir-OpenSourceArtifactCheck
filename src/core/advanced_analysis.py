@@ -104,6 +104,39 @@ class AdvancedAnalysis:
                     asyncio.open_connection(ip, port),
                     timeout=2.0
                 )
+                
+                # Дополнительная проверка: пробуем прочитать баннер
+                # Если порт фильтруется Google, соединение может быть без данных
+                try:
+                    await asyncio.wait_for(reader.read(1), timeout=0.5)
+                    # Если прочитали байт — порт действительно открыт
+                    open_ports.append({"port": port, "service": services.get(port, "Unknown")})
+                except:
+                    # Нет данных — порт фильтруется, не считаем открытым
+                    pass
+                
+                writer.close()
+                await writer.wait_closed()
+            except:
+                pass
+
+        tasks = [check_port(port) for port in common_ports]
+        await asyncio.gather(*tasks)
+
+        return {
+            "service": "Port Scanner",
+            "ip": ip,
+            "open_ports": open_ports,
+            "total_scanned": len(common_ports),
+            "open_count": len(open_ports)
+        }
+
+        async def check_port(port):
+            try:
+                reader, writer = await asyncio.wait_for(
+                    asyncio.open_connection(ip, port),
+                    timeout=2.0
+                )
                 writer.close()
                 await writer.wait_closed()
                 open_ports.append({"port": port, "service": services.get(port, "Unknown")})
@@ -129,7 +162,7 @@ class AdvancedAnalysis:
             async with aiohttp.ClientSession() as session:
                 async with session.get(url, timeout=10) as response:
                     if response.status == 200:
-                        data = await response.json()
+                        data = await response.json()  # <- 24 пробела (не 25)
                         if data.get('status') == 'success':
                             return {
                                 "service": "GeoLocation",
