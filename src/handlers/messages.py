@@ -139,18 +139,25 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
             'value': artifact_value
         }
 
-        # Create buttons
-        keyboard = [[
-            InlineKeyboardButton("📊 PDF", callback_data=f"pdf_{artifact_type}_{artifact_value}"),
-            InlineKeyboardButton("📈 Chart", callback_data=f"chart_{artifact_type}_{artifact_value}"),
-            InlineKeyboardButton("💾 CSV", callback_data=f"csv_{artifact_type}_{artifact_value}"),
-            InlineKeyboardButton("📄 JSON", callback_data=f"json_{artifact_type}_{artifact_value}")
-        ]]
+        # Create buttons (only if there are results)
+        if results and len(results) > 0:
+            # Обрезаем длинные значения для callback_data (Telegram ограничение 64 байта)
+            safe_callback = artifact_value[:50] if len(artifact_value) > 50 else artifact_value
+            
+            keyboard = [[
+                InlineKeyboardButton("📊 PDF", callback_data=f"pdf_{artifact_type}_{safe_callback}"),
+                InlineKeyboardButton("📈 Chart", callback_data=f"chart_{artifact_type}_{safe_callback}"),
+                InlineKeyboardButton("💾 CSV", callback_data=f"csv_{artifact_type}_{safe_callback}"),
+                InlineKeyboardButton("📄 JSON", callback_data=f"json_{artifact_type}_{safe_callback}")
+            ]]
+            reply_markup = InlineKeyboardMarkup(keyboard)
+        else:
+            reply_markup = None
 
         await processing_msg.edit_text(
             output,
             parse_mode=ParseMode.MARKDOWN,
-            reply_markup=InlineKeyboardMarkup(keyboard)
+            reply_markup=reply_markup
         )
 
         # Send map link if available

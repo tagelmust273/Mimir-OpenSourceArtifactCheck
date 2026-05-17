@@ -1,8 +1,10 @@
 """Callback handler for inline buttons"""
 
+import asyncio
 import logging
 from telegram import Update, InputFile
 from telegram.ext import ContextTypes
+from io import BytesIO
 
 from core.visualization import Visualization
 from core.report_generator import ReportGenerator
@@ -29,7 +31,7 @@ async def handle_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     try:
         if action == "pdf":
-            await query.edit_message_text("📄 Generating PDF report...")
+            await query.edit_message_text("📄 Generating PDF report... (may take up to 30 seconds)")
 
             # Prepare threat data
             threat_data = {
@@ -48,18 +50,27 @@ async def handle_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
                     threat_data['undetected'] = result.get('undetected', 0)
                 elif result.get('service') == 'AbuseIPDB':
                     threat_data['services']['AbuseIPDB'] = result.get('abuse_score', 0)
-                elif result.get('service') == 'GreyNoise':
-                    classification = result.get('classification', 'unknown')
-                    score = 75 if classification == 'malicious' else 25 if classification == 'suspicious' else 0
-                    threat_data['services']['GreyNoise'] = score
 
-            # Create chart
-            chart_buffer = await Visualization.create_threat_chart(threat_data)
+            # Create chart with timeout
+            try:
+                chart_buffer = await asyncio.wait_for(
+                    Visualization.create_threat_chart(threat_data), 
+                    timeout=60.0
+                )
+                chart_buffer.seek(0)
+            except asyncio.TimeoutError:
+                await query.message.reply_text("❌ Chart generation timed out. Please try again.")
+                return
 
-            # Generate PDF
-            pdf_buffer = await ReportGenerator.generate_pdf(
-                artifact_value, artifact_type, results, chart_buffer
-            )
+            # Generate PDF with timeout
+            try:
+                pdf_buffer = await asyncio.wait_for(
+                    ReportGenerator.generate_pdf(artifact_value, artifact_type, results, chart_buffer),
+                    timeout=60.0
+                )
+            except asyncio.TimeoutError:
+                await query.message.reply_text("❌ PDF generation timed out. Please try again.")
+                return
 
             await query.message.reply_document(
                 document=InputFile(pdf_buffer, filename=f"report_{OutputSanitizer.sanitize_html(artifact_value)}.pdf"),
@@ -105,7 +116,16 @@ async def handle_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
                 elif result.get('service') == 'AbuseIPDB':
                     threat_data['services']['AbuseIPDB'] = result.get('abuse_score', 0)
 
-            chart_buffer = await Visualization.create_threat_chart(threat_data)
+            # Create chart with timeout
+            try:
+                chart_buffer = await asyncio.wait_for(
+                    Visualization.create_threat_chart(threat_data), 
+                    timeout=60.0
+                )
+                chart_buffer.seek(0)
+            except asyncio.TimeoutError:
+                await query.message.reply_text("❌ Chart generation timed out. Please try again.")
+                return
 
             await query.message.reply_photo(
                 photo=InputFile(chart_buffer, filename="threat_chart.png"),

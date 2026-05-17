@@ -3,6 +3,7 @@
 import json
 import csv
 import datetime
+import time
 from io import BytesIO
 from typing import Dict, List
 from reportlab.lib import colors
@@ -105,6 +106,7 @@ class ReportGenerator:
         # Add chart
         if chart_buffer:
             story.append(Paragraph("Threat Visualization", heading_style))
+            chart_buffer.seek(0)
             story.append(Spacer(1, 12))
             img = Image(chart_buffer, width=5*inch, height=3*inch)
             story.append(img)
@@ -126,29 +128,42 @@ class ReportGenerator:
         Returns:
             BytesIO: CSV file buffer
         """
+        import csv
+        
         buffer = BytesIO()
-
+        
         # Collect all unique keys
         all_keys = set()
         for result in results:
             for key in result.keys():
                 if key != 'service' and not isinstance(result[key], (dict, list)):
                     all_keys.add(key)
-
-        # Write CSV
-        writer = csv.writer(buffer)
-        writer.writerow(['service'] + sorted(list(all_keys)))
-
+        
+        all_keys = sorted(list(all_keys))
+        
+        # Build CSV as string first
+        csv_lines = []
+        
+        # Header
+        header = ['service'] + all_keys
+        csv_lines.append(','.join(f'"{str(h)}"' for h in header))
+        
+        # Data rows
         for result in results:
             row = [result.get('service', 'Unknown')]
-            for key in sorted(all_keys):
+            for key in all_keys:
                 value = result.get(key, 'N/A')
                 if isinstance(value, (dict, list)):
                     value = json.dumps(value, ensure_ascii=False)
-                row.append(str(value))
-            writer.writerow(row)
-
+                # Clean value for CSV
+                value_str = str(value).replace('"', '""')
+                row.append(value_str)
+            csv_lines.append(','.join(f'"{str(r)}"' for r in row))
+        
+        # Write to buffer
+        buffer.write('\n'.join(csv_lines).encode('utf-8'))
         buffer.seek(0)
+        
         return buffer
 
     @staticmethod
@@ -163,6 +178,10 @@ class ReportGenerator:
             BytesIO: JSON file buffer
         """
         buffer = BytesIO()
-        json.dump(results, buffer, indent=2, ensure_ascii=False, default=str)
+        
+        # Convert to JSON string then to bytes
+        json_str = json.dumps(results, indent=2, ensure_ascii=False, default=str)
+        buffer.write(json_str.encode('utf-8'))
         buffer.seek(0)
+        
         return buffer
