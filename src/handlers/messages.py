@@ -35,12 +35,12 @@ def format_results(artifact_type: str, artifact_value: str, results: list) -> st
             output += f"  📊 Reports: {result.get('total_reports', 0)}\n"
             output += f"  🌍 Country: {result.get('country', 'N/A')}\n"
 
-        elif service == "GreyNoise":
-            classification = result.get("classification", "unknown")
-            emoji = "🔴" if classification == "malicious" else "🟡" if classification == "suspicious" else "🟢"
-            output += f"  {emoji} Classification: {classification}\n"
-            output += f"  🎯 Noise: {'Yes' if result.get('noise') else 'No'}\n"
-            output += f"  🏢 RIOT: {'Yes' if result.get('riot') else 'No'}\n"
+#        elif service == "GreyNoise":
+ #           classification = result.get("classification", "unknown")
+  #          emoji = "🔴" if classification == "malicious" else "🟡" if classification == "suspicious" else "🟢"
+   #         output += f"  {emoji} Classification: {classification}\n"
+    #        output += f"  🎯 Noise: {'Yes' if result.get('noise') else 'No'}\n"
+     #       output += f"  🏢 RIOT: {'Yes' if result.get('riot') else 'No'}\n"
 
         elif service == "VirusTotal":
             malicious = result.get("malicious", 0)

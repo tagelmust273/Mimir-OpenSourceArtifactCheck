@@ -11,7 +11,7 @@ rate_limiter = RateLimiter(max_requests=settings.security.max_requests_per_minut
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """Handle /start command"""
     text = """
-🔐 *OSINT Artifact Analyzer Bot*
+🔐 *Mimir - OSINT Artifact Analyzer Bot*
 
 Анализ IP-адресов, доменов и хешей через OSINT-сервисы.
 
@@ -48,7 +48,7 @@ async def help_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
 • SHA256: `2cf24dba5fb0a30e26e83b2ac5b9e29e1b161e5c1fa7425e73043362938b9824`
 
 *Ограничения:*
-• 10 запросов в минуту
+• 10 запросов в минуту (из-за ограничений сервисов)
 • Только публичные IP
 • Максимум 4000 символов в ответе
 
@@ -70,9 +70,9 @@ async def about(update: Update, context: ContextTypes.DEFAULT_TYPE):
     text = """
 ℹ️ *О боте*
 
-*OSINT Artifact Analyzer Bot v1.0*
+*Mimir - OSINT Artifact Analyzer Bot v1.0*
 
-Инструмент для анализа подозрительных артефактов с использованием OSINT-сервисов.
+Инструмент для анализа подозрительных артефактов с использованием OSINT-сервисов..
 
 *Технологии:*
 • Python 3.11
@@ -89,18 +89,20 @@ async def about(update: Update, context: ContextTypes.DEFAULT_TYPE):
 • Санитизация вывода
 • Блокировка приватных IP
 
-*Разработчик:* OSINT Security Team
-*Лицензия:* MIT
-"""
+*Разработчик:* Tamirlan Tarchokov ( a.k.a tagelmust, holydiver, goldwinchester )
+."""
     await update.message.reply_text(text, parse_mode='Markdown')
 
 
 async def stats(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """Handle /stats command"""
-    from utils.rate_limiter import rate_limiter
+    from utils.rate_limiter import RateLimiter
+    from config import settings 
+
+    my_limiter = RateLimiter(max_requests=settings.security.max_requests_per_minute)
 
     user_id = str(update.effective_user.id)
-    remaining = rate_limiter.get_remaining(user_id)
+    remaining = my_limiter.get_remaining(user_id)
     total_analyzed = context.user_data.get('total_analyzed', 0)
 
     text = f"""
@@ -112,3 +114,4 @@ async def stats(update: Update, context: ContextTypes.DEFAULT_TYPE):
 Всего обработано артефактов: {total_analyzed}
 """
     await update.message.reply_text(text, parse_mode='Markdown')
+

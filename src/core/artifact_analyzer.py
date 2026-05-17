@@ -30,9 +30,9 @@ class ArtifactAnalyzer:
             if "error" not in abuse:
                 results.append(abuse)
 
-            grey = await OSINTServices.check_greynoise(artifact_value)
-            if "error" not in grey:
-                results.append(grey)
+           # grey = await OSINTServices.check_greynoise(artifact_value)
+           # if "error" not in grey:
+           #     results.append(grey)
 
             vt = await OSINTServices.check_virustotal(artifact_value, "ip")
             if "error" not in vt:
